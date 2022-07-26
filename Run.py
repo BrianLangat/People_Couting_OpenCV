@@ -24,9 +24,11 @@ def run():
     ap.add_argument("-o", "--output", type=str,
                     help="path to optional output video file")
 
-    # confidence default 0.4
-    ap.add_argument("-c", "--confidence", type=float, default=0.6,
+    # confidence default 0.45
+    ap.add_argument("-c", "--confidence", type=float, default=0.45,
                     help="minimum probability to filter weak detections")
+
+        #setting how many frames to skip
     ap.add_argument("-s", "--skip-frames", type=int, default=30,
                     help="# of skip frames between detections")
     args = vars(ap.parse_args())
@@ -38,10 +40,14 @@ def run():
                "dog", "horse", "motorbike", "person", "pottedplant", "sheep",
                "sofa", "train", "tvmonitor"]
 
-    # load our serialized model from disk
-    net = cv2.dnn.readNetFromCaffe(args["prototxt"], args["model"])
+      #load our serialized model from disk
+    #net = cv2.dnn.readNetFromCaffe(args["prototxt"], args["model"])
 
-    # if a video path was not supplied, grab a reference to the ip camera
+    net = cv2.dnn.readNet(args["model"])
+
+
+            # if a video path was not supplied, grab a reference to the ip camera
+
     if not args.get("input", False):
         print("[INFO] Starting the live stream..")
         vs = VideoStream(config.url).start()
@@ -213,6 +219,8 @@ def run():
         # centroids with (2) the newly computed object centroids
         objects = ct.update(rects)
 
+
+
         # loop over the tracked objects
         for (objectID, centroid) in objects.items():
             # check to see if a trackable object exists for the current
@@ -241,7 +249,7 @@ def run():
                     # line, count the object
 
                     # Increase the count for passengers exiting
-                    if direction < 0 and (H // 2) > centroid[1] < (W // 3) and centroid[1] > 2*(W // 3):
+                    if direction < 0 and centroid[1] > (H//2):
                         totalUp += 1
                         empty.append(totalUp)
                         to.counted = True
@@ -250,7 +258,7 @@ def run():
                     # is moving down) AND the centroid is below the
                     # detection line, count the ob
 
-                    elif direction > 0 and centroid[1] > (H // 2) and (W // 3) < centroid[1] < 2 * (W // 3):
+                    elif direction > 0 and centroid[1] < (H // 2):
                         # Incerement the entrance count
                         totalDown += 1
                         empty1.append(totalDown)
